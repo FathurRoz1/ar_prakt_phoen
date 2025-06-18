@@ -10,7 +10,7 @@
 <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
         <a-assets>
-            <a-asset-item id="modelnya" src="assets/kupu-kupu.gltf"></a-asset-item>
+            <!-- <a-asset-item id="modelnya" src="assets/kupu-kupu.gltf"></a-asset-item> -->
             <a-asset-item id="bunga" src="assets/scene.gltf"></a-asset-item>
             <audio id="music" src="assets/phoenix.mp3" preload="auto"></audio>
         </a-assets>
@@ -49,26 +49,26 @@
 <script>
     const marker = document.querySelector('a-marker');
     const soundEntity = document.querySelector('a-sound');
-      const bowserModel = document.getElementById('kupu-kupu');
-      const bowserModel1 = document.getElementById('dasar');
-  
-      marker.addEventListener('markerFound', () => {
+    const bowserModel1 = document.getElementById('dasar');
+
+    marker.addEventListener('markerFound', () => {
         soundEntity.components.sound.playSound();
-  
-        // Calculate scale based on marker dimensions
-        const markerWidth = marker.getAttribute('width');
-        const markerHeight = marker.getAttribute('height');
-  
-        // Adjust model scale proportionally to marker size while maintaining aspect ratio
-        const modelAspectRatio = bowserModel.object3D.boundingBox.max.x / bowserModel.object3D.boundingBox.max.y;
-        const modelAspectRatio1 = bowserModel1.object3D.boundingBox.max.x / bowserModel1.object3D.boundingBox.max.y;
-        const scaleX = markerWidth / modelAspectRatio;
-        const scaleY = markerHeight;  
-        bowserModel.setAttribute('scale', { x: scaleX, y: scaleY, z: scaleX });
-      });
-      marker.addEventListener('markerLost', () => {
+
+        // Tunggu sampai model dimuat sebelum akses boundingBox
+        bowserModel1.addEventListener('model-loaded', () => {
+            const boundingBox = new THREE.Box3().setFromObject(bowserModel1.object3D);
+            const size = new THREE.Vector3();
+            boundingBox.getSize(size);
+
+            const scale = 1 / Math.max(size.x, size.y, size.z); // sesuaikan scaling otomatis
+            bowserModel1.setAttribute('scale', { x: scale, y: scale, z: scale });
+        });
+    });
+
+    marker.addEventListener('markerLost', () => {
         soundEntity.components.sound.stopSound();
-      });
-  </script>
+    });
+</script>
+
 </body>
 </html>
